@@ -687,7 +687,7 @@ function getNodes(array $params, int $loc_id) {
         Fetches and returns all nodes with a specific location_id
     */
     $filteredNodes = Array();
-    $nodes = wisp_API($params, 'nodes/');
+    $nodes = wisp_API($params, 'nodes');
     foreach($nodes['data'] as $key => $value) {
         $node_id = $value['attributes']['id'];
         if($value['attributes']['location_id'] == $loc_id) {
