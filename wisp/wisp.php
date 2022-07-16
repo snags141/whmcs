@@ -796,7 +796,7 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
             $main_allocation_id = $portDetails['id'];
             $main_allocation_port = $port;
             $found_all = true;
-            foreach($port_offsets_array as $key => $port_offset) {
+            foreach($port_offsets_array as $port_offset => $environment) {
                 $next_port = intval($port) + intval($port_offset);
                 if(!isset($ports[$next_port])) {
                     // Port is not available
@@ -806,7 +806,7 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
                     array_push($additional_allocation_ids, strval($ports[$next_port]['id']));
                     //array_push($additional_allocation_ports, strval($next_port));
 
-                    $additional_allocation_ports[$key] = $next_port;
+                    $additional_allocation_ports[$environment] = $next_port;
                 }
             }
             if($found_all == true) {
