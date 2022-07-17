@@ -419,14 +419,14 @@ function wisp_CreateAccount(array $params) {
                     if($final_allocations != false && $final_allocations['status'] == true) {
                         $alloc_success = true;
                         logModuleCall("WISP-WHMCS", "Successfully found an allocation. Setting primary allocation to ID " . $final_allocations['main_allocation_id'], "", "");
-                        
+                        unset($serverData['deploy']);
                         $serverData['allocation']['default'] = intval($final_allocations['main_allocation_id']);
                         $serverData['allocation']['additional'] = $final_allocations['additional_allocation_ids'];
                         
                         // Update the environment parameters - additional allocations
                         foreach($final_allocations['additional_allocation_ports'] as $key => $port) {
                             // If the key given in the config had a value of NONE, don't worry about adding it to the environment parameters.
-                            if(substr( $key, 0, 5 ) !== "NONE_") {
+                            if(substr( $key, 0, 4 ) !== "NONE") {
                                 $serverData['environment'][$key] = $port;
                             }
                         }
