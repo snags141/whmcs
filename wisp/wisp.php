@@ -843,10 +843,9 @@ function findFreePorts(array $available_allocations, string $port_offsets,$deplo
                 $additional_allocation_ports = Array();
             }
         }
-
-        // Failed to find available set of ports based on requirements
-        logModuleCall("WISP-WHMCS", "Failed to find available ports!", "", "");
-        return false;
     }
+    // Failed to find available set of ports based on requirements
+    logModuleCall("WISP-WHMCS", "Failed to find available ports!", "", "");
+    return false;
 }
 
