@@ -414,7 +414,7 @@ function wisp_CreateAccount(array $params) {
                     $available_allocations = getAllocations($params,$node_id);
                     
                     // Taking our additional allocation requirements and available node allocations, find a combination of available ports.
-                    $final_allocations = findFreePorts($available_allocations, $additional_port_list);
+                    $final_allocations = findFreePorts($available_allocations, $additional_port_list,$serverData['deploy']);
 
                     if($final_allocations != false && $final_allocations['status'] == true) {
                         $alloc_success = true;
@@ -757,7 +757,7 @@ function getPaginatedData($params,$url) {
     return $results;
 }
 
-function findFreePorts(array $available_allocations, string $port_offsets) {
+function findFreePorts(array $available_allocations, string $port_offsets,$deploy) {
     /*
         This is the main logic that takes a list of available allocations
         and the required offsets and then finds the first available set.
@@ -789,7 +789,25 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
         $main_allocation_port = "";
         $additional_allocation_ids = Array();
         $additional_allocation_ports = Array();
+        if(isset($deploy["port_range"])){
+            $deploy["port_range"] = json_encode($deploy["port_range"]);
+            //converts port_range string to object filled with int
+            $portrange = [];
+            array_push($portrange,intval(ltrim(strstr($deploy["port_range"],'-',true),'["')));
+            array_push($portrange, intval(ltrim(strstr($deploy["port_range"],'-'),'-')));
 
+            for ($i = $portrange[0] + 1; $i < $portrange[1]; $i++) {
+                array_push($portrange,$i);
+            }
+            //no need to sort but doing it to make it easier for possible future features
+            sort($portrange);
+            foreach($ports as $port => $portDetails) {
+                json_decode($port);
+                if(!in_array($port,$portrange)){
+                    unset($ports[$port]);
+                }
+            }
+        }
         // Iterate over Ports
         logModuleCall("WISP-WHMCS", "Checking IP: ".$ip_addr, "", "");
         foreach($ports as $port => $portDetails) {

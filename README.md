@@ -62,7 +62,7 @@ E.g: If you enter `{"1":"NONE", "2":"NONE", "4":"NONE"}` and the first available
 
 (If they're available)
 
-Note: I this option is set, it will override anything specified under "port_range" - Use one or the other, not both.
+Note: I this option is set, it will override "Location ID" and "Dedicated IP".
 
 You'll also want to configure "**Additional Port Failure Mode**".
 This determines what the module should do if there are no allocations available on any of the defined nodes.
