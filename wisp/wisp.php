@@ -789,7 +789,7 @@ function findFreePorts(array $available_allocations, string $port_offsets,$deplo
         $main_allocation_port = "";
         $additional_allocation_ids = Array();
         $additional_allocation_ports = Array();
-        if(isset($deploy["port_range"])){
+        if(!empty($deploy["port_range"])){
             $deploy["port_range"] = json_encode($deploy["port_range"]);
             //converts port_range string to object filled with int
             $portrange = [];
