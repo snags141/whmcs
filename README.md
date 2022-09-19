@@ -55,14 +55,14 @@ The customer gets an email from the panel to setup their account (incl. password
 ## My game requires multiple ports allocated.
 Configure the "**Additional Ports**" option in the module settings.
 It expects a valid JSON string consisting of the parameter name or NONE, and a number representing a port as a numeric offset from the first available allocation.
-E.g: If you enter `{1:"NONE", 2:"NONE", 4:"NONE"}` and the first available port happens to be 25565, you'll get as additional allocations: 
+E.g: If you enter `{"1":"NONE", "2":"NONE", "4":"NONE"}` and the first available port happens to be 25565, you'll get as additional allocations: 
 * 25566 (First Port + 1)
 * 25567 (First Port +2)
 * 25569 (First Port +4)
 
 (If they're available)
 
-Note: I this option is set, it will override anything specified under "port_range" - Use one or the other, not both.
+Note: Is this option is set, it will override "Location ID" and "Dedicated IP".
 
 You'll also want to configure "**Additional Port Failure Mode**".
 This determines what the module should do if there are no allocations available on any of the defined nodes.
@@ -75,13 +75,13 @@ See the table below for "Additional Ports" example values.
 
 | Game | Required Ports  |Additional Ports Example  | Ports Assigned  |
 | ------------ | ------------ | ------------ | ------------ |
-| Rust | Game port and RCON port | `{1:"RCON_PORT"}`  | Game Port: 1000, RCON_PORT: 1001|
-| Arma 3 | Game port, Game port +1 for Steam Query, Game port + 2 for Steam Port, and Game port +4 for BattleEye |  `{1:"NONE", 2:"NONE", 4:"NONE"}` | Game Port: 1000, Additional Ports: 1001, 1002, 1004 |
-| Unturned | Game port, Game port +1 and Game port +2 | `{1:"NONE", 2:"NONE"}` | Game Port: 1000, Additional Ports: 1001, 1002 |
-| Project Zomboid | Game Port, Steam port and an additional port for every player. Let's say we want 10 additional ports for 10 players. | `{1:"STEAM_PORT", 2:"NONE", 3:"NONE", 4:"NONE", 5:"NONE", 6:"NONE", 7:"NONE", 8:"NONE", 9:"NONE", 10:"NONE", 11:"NONE"}` | Game Port: 1000, Steam Port: 1001, Additional Ports: 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011|
+| Rust | Game port and RCON port | `{"1":"RCON_PORT"}`  | Game Port: 1000, RCON_PORT: 1001|
+| Arma 3 | Game port, Game port +1 for Steam Query, Game port + 2 for Steam Port, and Game port +4 for BattleEye |  `{"1":"NONE", "2":"NONE", "4":"NONE"}` | Game Port: 1000, Additional Ports: 1001, 1002, 1004 |
+| Unturned | Game port, Game port +1 and Game port +2 | `{"1":"NONE", "2":"NONE"}` | Game Port: 1000, Additional Ports: 1001, 1002 |
+| Project Zomboid | Game Port, Steam port and an additional port for every player. Let's say we want 10 additional ports for 10 players. | `{"1":"STEAM_PORT", "2":"NONE", "3":"NONE", "4":"NONE", "5":"NONE", "6":"NONE", "7":"NONE", "8":"NONE", "9":"NONE", "10":"NONE", "11":"NONE"}` | Game Port: 1000, Steam Port: 1001, Additional Ports: 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011|
 
 **What does "NONE" mean?**
-"NONE" means you want to assign the additional port to the server, but it doesn't need to be assigned to a server parameter. If instead you want to add a +1 port and assign it to the parameter "RCON_PORT" then you'd use `{1:"RCON_PORT"}` for example.
+"NONE" means you want to assign the additional port to the server, but it doesn't need to be assigned to a server parameter. If instead you want to add a +1 port and assign it to the parameter "RCON_PORT" then you'd use `{"1":"RCON_PORT"}` for example.
 
 ## How to enable module debug log
 1. In WHMCS 7 or below navigate to Utilities > Logs > Module Log. For WHMCS 8.x navigate to System Logs > Module Log in the left sidebar.

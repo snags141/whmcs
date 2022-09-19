@@ -302,8 +302,8 @@ function wisp_CreateAccount(array $params) {
             if($userResult['meta']['pagination']['total'] === 0) {
                 $userResult = wisp_API($params, 'users', [
                     'email' => $params['clientsdetails']['email'],
-                    'first_name' => $params['clientsdetails']['firstname'],
-                    'last_name' => $params['clientsdetails']['lastname'],
+                    'first_name' => empty($params['clientsdetails']['firstname']) ? 'Unknown' : $params['clientsdetails']['firstname'],
+                    'last_name' => empty($params['clientsdetails']['lastname']) ? 'User' : $params['clientsdetails']['lastname'],
                     'external_id' => $params['clientsdetails']['uuid'],
                 ], 'POST');
             } else {
@@ -414,19 +414,19 @@ function wisp_CreateAccount(array $params) {
                     $available_allocations = getAllocations($params,$node_id);
                     
                     // Taking our additional allocation requirements and available node allocations, find a combination of available ports.
-                    $final_allocations = findFreePorts($available_allocations, $additional_port_list);
+                    $final_allocations = findFreePorts($available_allocations, $additional_port_list,$serverData['deploy']);
 
                     if($final_allocations != false && $final_allocations['status'] == true) {
                         $alloc_success = true;
                         logModuleCall("WISP-WHMCS", "Successfully found an allocation. Setting primary allocation to ID " . $final_allocations['main_allocation_id'], "", "");
-                        
+                        unset($serverData['deploy']);
                         $serverData['allocation']['default'] = intval($final_allocations['main_allocation_id']);
                         $serverData['allocation']['additional'] = $final_allocations['additional_allocation_ids'];
                         
                         // Update the environment parameters - additional allocations
                         foreach($final_allocations['additional_allocation_ports'] as $key => $port) {
                             // If the key given in the config had a value of NONE, don't worry about adding it to the environment parameters.
-                            if(substr( $key, 0, 5 ) !== "NONE_") {
+                            if(substr( $key, 0, 4 ) !== "NONE") {
                                 $serverData['environment'][$key] = $port;
                             }
                         }
@@ -687,7 +687,7 @@ function getNodes(array $params, int $loc_id) {
         Fetches and returns all nodes with a specific location_id
     */
     $filteredNodes = Array();
-    $nodes = wisp_API($params, 'nodes/');
+    $nodes = wisp_API($params, 'nodes');
     foreach($nodes['data'] as $key => $value) {
         $node_id = $value['attributes']['id'];
         if($value['attributes']['location_id'] == $loc_id) {
@@ -757,7 +757,7 @@ function getPaginatedData($params,$url) {
     return $results;
 }
 
-function findFreePorts(array $available_allocations, string $port_offsets) {
+function findFreePorts(array $available_allocations, string $port_offsets,$deploy) {
     /*
         This is the main logic that takes a list of available allocations
         and the required offsets and then finds the first available set.
@@ -789,14 +789,32 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
         $main_allocation_port = "";
         $additional_allocation_ids = Array();
         $additional_allocation_ports = Array();
+        if(!empty($deploy["port_range"])){
+            $deploy["port_range"] = json_encode($deploy["port_range"]);
+            //converts port_range string to object filled with int
+            $portrange = [];
+            array_push($portrange,intval(ltrim(strstr($deploy["port_range"],'-',true),'["')));
+            array_push($portrange, intval(ltrim(strstr($deploy["port_range"],'-'),'-')));
 
+            for ($i = $portrange[0] + 1; $i < $portrange[1]; $i++) {
+                array_push($portrange,$i);
+            }
+            //no need to sort but doing it to make it easier for possible future features
+            sort($portrange);
+            foreach($ports as $port => $portDetails) {
+                json_decode($port);
+                if(!in_array($port,$portrange)){
+                    unset($ports[$port]);
+                }
+            }
+        }
         // Iterate over Ports
         logModuleCall("WISP-WHMCS", "Checking IP: ".$ip_addr, "", "");
         foreach($ports as $port => $portDetails) {
             $main_allocation_id = $portDetails['id'];
             $main_allocation_port = $port;
             $found_all = true;
-            foreach($port_offsets_array as $key => $port_offset) {
+            foreach($port_offsets_array as $port_offset => $environment) {
                 $next_port = intval($port) + intval($port_offset);
                 if(!isset($ports[$next_port])) {
                     // Port is not available
@@ -806,7 +824,7 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
                     array_push($additional_allocation_ids, strval($ports[$next_port]['id']));
                     //array_push($additional_allocation_ports, strval($next_port));
 
-                    $additional_allocation_ports[$key] = $next_port;
+                    $additional_allocation_ports[$environment] = $next_port;
                 }
             }
             if($found_all == true) {
@@ -825,10 +843,9 @@ function findFreePorts(array $available_allocations, string $port_offsets) {
                 $additional_allocation_ports = Array();
             }
         }
-
-        // Failed to find available set of ports based on requirements
-        logModuleCall("WISP-WHMCS", "Failed to find available ports!", "", "");
-        return false;
     }
+    // Failed to find available set of ports based on requirements
+    logModuleCall("WISP-WHMCS", "Failed to find available ports!", "", "");
+    return false;
 }
 
